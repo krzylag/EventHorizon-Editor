@@ -78,6 +78,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ModDecompiler.cs" />
     <Compile Include="ComponentEditorDialog.cs">
       <SubType>Form</SubType>
     </Compile>

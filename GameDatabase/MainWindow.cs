@@ -700,5 +700,18 @@ namespace GameDatabase
             }
             OppenedWindows = new Dictionary<string, Form>();
         }
+
+        private void decompileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    ModDecompiler md = new ModDecompiler((FileStream)openFileDialog1.OpenFile(), folderBrowserDialog1.SelectedPath);
+
+                }
+            }
+        }
+
     }
 }
