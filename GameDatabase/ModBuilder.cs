@@ -57,50 +57,28 @@ namespace GameDatabase
 
         public void Build(FileStream stream)
         {
-       
-        /*
-                try
-                {
-                    FileStream inp = new FileStream("c:\\Users\\klagan\\Desktop\\End.Of.Paradox", FileMode.Open);
-                    var size = (uint)inp.Length-1;
-                    byte[] data = new byte[size];
-                    inp.Read(data, 0, (int)size);
-
-                    var decodedData = DecodeArray(data);
-
-                    var unzippedData = ZlibStream.UncompressBuffer(decodedData);
-
-                    FileStream outp = new FileStream("c:\\Users\\klagan\\Desktop\\End.Of.Paradox.decompiled", FileMode.Create);
-                    outp.Write(unzippedData, 0, unzippedData.Length);
-                    outp.Close();
-
-                }
-                finally
-                {
-
-                }
-
-        */
             try
             {
-                FileStream inp = new FileStream("c:\\Users\\klagan\\Desktop\\End.Of.Paradox.decompiled", FileMode.Open);
-                var inpSize = (uint)inp.Length;
-                byte[] inpData = new byte[inpSize];
-                inp.Read(inpData, 0, (int)inpSize);
+                var rawdata = SerializeData().ToArray();
+                var data = ZlibStream.CompressBuffer(rawdata.ToArray());
 
-                var data = ZlibStream.CompressBuffer(inpData.ToArray());
+                var size = (uint)data.Length;
+                byte checksumm = 0;
+                uint w = 0x12345678 ^ size;
+                uint z = 0x87654321 ^ size;
+                for (int i = 0; i < size; ++i)
+                {
+                    checksumm += data[i];
+                    data[i] = (byte)(data[i] ^ (byte)random(ref w, ref z));
+                }
 
-                var encodedData = EncodeArray(data);
-
-                FileStream outp = new FileStream("c:\\Users\\klagan\\Desktop\\End.Of.Paradox.recompiled", FileMode.Create);
-                outp.Write(encodedData, 0, encodedData.Length);
-                outp.Close();
+                stream.Write(data, 0, data.Length);
+                stream.WriteByte((byte)(checksumm ^ (byte)random(ref w, ref z)));
             }
             finally
             {
-                //stream.Close();s
+                stream.Close();
             }
-            
         }
 
         private IEnumerable<byte> SerializeData()
@@ -172,55 +150,6 @@ namespace GameDatabase
             z = 36969 * (z & 65535) + (z >> 16);
             w = 18000 * (w & 65535) + (w >> 16);
             return (z << 16) + w;  /* 32-bit result */
-        }
-
-        private static byte[] EncodeArray(byte[] data)
-        {
-            var size = (uint)data.Length;
-            if (size == 0) return null;
-
-            byte[] result = new byte[size+1];
-            byte checksumm = 0;
-
-            uint w = 0x12345678 ^ size;
-            uint z = 0x87654321 ^ size;
-
-            for (int i = 0; i < size; ++i)
-            {
-                checksumm += data[i];
-                result[i] = (byte)(data[i] ^ (byte)random(ref w, ref z));
-            }
-            result[size] = (byte)(checksumm ^ (byte)random(ref w, ref z));
-
-            return result;
-        }
-
-        private static byte[] DecodeArray(byte[] data)
-        {
-            if ((uint)data.Length <= 1) return null;
-            var size = ((uint)data.Length-1);
-
-            byte[] result = new byte[size];
-            byte checksumm = 0;
-
-            uint w = 0x12345678 ^ size;
-            uint z = 0x87654321 ^ size;
-
-            for (int i = 0; i < size; ++i)
-            {
-                result[i] = (byte)(data[i] ^ (byte)random(ref w, ref z));
-                checksumm += result[i];
-            }
-
-            checksumm = (byte)(checksumm ^ (byte)random(ref w, ref z));
-
-            if (checksumm != 0)
-            {
-                return null;
-            } else
-            {
-                return result;
-            }
         }
 
         private ModBuilder(string datapath, string name, string id)
