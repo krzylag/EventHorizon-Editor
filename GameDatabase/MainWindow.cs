@@ -707,8 +707,8 @@ namespace GameDatabase
             {
                 if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
                 {
-                    ModDecompiler md = new ModDecompiler((FileStream)openFileDialog1.OpenFile(), folderBrowserDialog1.SelectedPath);
-
+                    ModDecompiler md = new ModDecompiler(openFileDialog1.FileName, folderBrowserDialog1.SelectedPath);
+                    md.Decompile();
                 }
             }
         }
