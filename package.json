@@ -1,0 +1,16 @@
+{
+  "name": "eh_decompler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "start.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "uint32": "^0.2.1",
+    "xml2json": "^0.12.0"
+  }
+}
