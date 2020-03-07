@@ -15,40 +15,63 @@ export default class BigPart {
 
     constructor(from, data) {
 
-        this.small_parts = [];
-        this.starts_at = from;
         let position = from+1;
 
+        this.starts_at = from;
         this.type = data[from];
-        switch (this.type) {
-            case TYPE.JSON:
-                this.small_parts[0] = new SmallPart(position, data);
-                position = this.small_parts[0].ends_at+1;
-                break;
 
-            case TYPE.IMAGE:
-                this.small_parts[0] = new SmallPart(position, data);
-                position = this.small_parts[0].ends_at+1;
-                this.small_parts[1] = new SmallPart(position, data);
-                position = this.small_parts[1].ends_at+1;
-                break;
+        this.parts = {
+            name: null,
+            contents: null
+        };
 
-            case TYPE.XML:
-                this.small_parts[0] = new SmallPart(position, data);
-                position = this.small_parts[0].ends_at+1;
-                this.small_parts[1] = new SmallPart(position, data);
-                position = this.small_parts[1].ends_at+1;
-                break;
+        this.file = {
+            name:       null,
+            path:       DECOMPRESS_PATH_ROOT + this._decideTypeSaveLocation(this.type),
+            full_path:  null,
+            contents:   null
+        };
 
-            case TYPE.WAV:
-                this.small_parts[0] = new SmallPart(position, data);
-                position = this.small_parts[0].ends_at+1;
-                this.small_parts[1] = new SmallPart(position, data);
-                position = this.small_parts[1].ends_at+1;
-                break;
+        this.json_attr = {
+            id:         null,
+            name:       null,
+            item_type:  null
+        };
 
-            default:
-                console.log('__undef! position: '+position+", type = "+ this.type);
+        if (this.type === TYPE.JSON) {
+
+            this.parts.contents = new SmallPart(position, data);
+            position = this.parts.contents.ends_at+1;
+            this.file.contents = this.parts.contents.toString();
+
+            let json = JSON.parse(this.file.contents);
+            this.json_attr = {
+                id:         typeof(json.Id)!=='undefined' ? parseInt(json.Id) : null,
+                name:       typeof(json.Name)!=='undefined' ? json.Name : null,
+                item_type:  typeof(json.ItemType)!=='undefined' ? parseInt(json.ItemType) : null
+            };
+            this.file.name = this.json_attr.id+".json";
+            this.file.path = this.file.path+this._decideJsonSaveLocation(this.json_attr.item_type);
+            this.file.full_path = this.file.path+"/"+this.file.name;
+
+        } else if (this.type===TYPE.IMAGE || this.type===TYPE.XML || this.type===TYPE.WAV) {
+
+            this.parts.name = new SmallPart(position, data);
+            position = this.parts.name.ends_at+1;
+            this.parts.contents = new SmallPart(position, data);
+            position = this.parts.contents.ends_at+1;
+
+            switch (this.type){
+                case TYPE.XML:      this.file.name = this.parts.name.toString()+".xml"; break;
+                case TYPE.WAV:      this.file.name = this.parts.name.toString()+".wav"; break;
+                default:            this.file.name = this.parts.name.toString();
+            }
+            
+            this.file.full_path = this.file.path+"/"+this.file.name;
+            this.file.contents = this.parts.contents.toFileBuffer();
+
+        } else {
+            console.error('__undef! position: '+position+", type = "+ this.type);
         }
 
         this.ends_at = position-1;
@@ -57,43 +80,19 @@ export default class BigPart {
 
 
     saveFile() {
+        if (!fs.existsSync(this.file.path)) fs.mkdirSync(this.file.path, { recursive: true });
+        fs.writeFileSync(this.file.full_path, this.file.contents);
+    }
 
-        if (!fs.existsSync(DECOMPRESS_PATH_ROOT)) fs.mkdirSync(DECOMPRESS_PATH_ROOT, { recursive: true });
-        
-        let filePath = DECOMPRESS_PATH_ROOT + this._decideTypeSaveLocation(this.type);
-        if (!fs.existsSync(filePath)) fs.mkdirSync(filePath, { recursive: true });
+    toString() {
+        return this.parts.contents.toString();
+    }
 
-        let fileName = null;
-        let fileContents = null;
-
-        switch (this.type) {
-            case TYPE.JSON:
-                fileContents = this.small_parts[0].toString();
-                let json = JSON.parse(fileContents);
-                filePath = filePath + this._decideJsonSaveLocation(json);
-                fileName = this._decideJsonFileName(json);
-                break;
-            case TYPE.IMAGE:
-                fileName = this.small_parts[0].toString();
-                fileContents = this.small_parts[1].toFileBuffer();
-                break;
-            case TYPE.XML:
-                fileName = this.small_parts[0].toString()+".xml";
-                fileContents = this.small_parts[1].toFileBuffer();
-                break;
-            case TYPE.WAV:
-                fileName = this.small_parts[0].toString()+".wav";
-                fileContents = this.small_parts[1].toFileBuffer();
-                break;
-
-            default:
-        }
-
-        if (fileName!==null) {
-            if (!fs.existsSync(filePath)) fs.mkdirSync(filePath, { recursive: true });
-            let fullName = filePath+"/"+fileName;
-            fs.writeFileSync(fullName, fileContents);
-            console.log('saved '+fullName);
+    updateFileName(lang) {
+        if (this.type===TYPE.JSON) {
+            this.file.name = lang.get(this.json_attr);
+            this.file.full_path = this.file.path+"/"+this.file.name;
+            //console.log(this.file.name);
         }
     }
 
@@ -107,8 +106,8 @@ export default class BigPart {
         }
     }
 
-    _decideJsonSaveLocation(json) {
-        switch (json.ItemType) {
+    _decideJsonSaveLocation(ItemType) {
+        switch (ItemType) {
             case 1:   return "/Component";
             case 2:   return "/Device";
             case 3:   return "/Weapon";
@@ -132,11 +131,8 @@ export default class BigPart {
             case 27:  return "/Ammunition/Bullets";
             case 100: return "/Settings";
             case 101: return "/Settings";
-            default:    return "/_unclassified";
+            default:  return "/_unclassified";
         }
     }
 
-    _decideJsonFileName(json) {
-        return json.Id+".json";
-    }
 }
