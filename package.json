@@ -2,14 +2,16 @@
   "name": "eh_decompler",
   "version": "1.0.0",
   "description": "",
-  "main": "start.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node --experimental-modules ./index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^8.2.0",
+    "text-encoding": "^0.7.0",
     "uint32": "^0.2.1",
     "xml2json": "^0.12.0"
   }
