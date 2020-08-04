@@ -25,7 +25,7 @@ for (let fname of fs.readdirSync(process.env.FOLDER_INPUT)) {
             model.files[idx].save("./"+process.env.FOLDER_OUTPUT+"/"+model.mod_name);
         }
 
-        fs.writeFileSync("./"+process.env.FOLDER_OUTPUT+"/"+model.mod_name+"/id", model.mod_guid)
+        // fs.writeFileSync("./"+process.env.FOLDER_OUTPUT+"/"+model.mod_name+"/id", model.mod_name+"\n"+model.mod_guid)
 
         console.log({
             name: model.mod_name,

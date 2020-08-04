@@ -1,3 +1,4 @@
+import fs from 'fs';
 import File from './File.js';
 import { TYPE } from '../DataModel.js';
 
@@ -14,16 +15,18 @@ export default class FileJson extends File {
 
     getSavePath() {
         let json = JSON.parse(this.getFileContents());
-        let subDir = this._decideJsonSaveLocation(json.ItemType);
-        let name = typeof(json.Name)!=='undefined' ? json.Name : '';
-        name += typeof(json.Id)!=='undefined' ? "_"+json.Id : '';
-        if (name==='') name = Date.now();
+        let path = process.env.FOLDER_NAME_JSON + this._decideJsonSaveLocation(json) + "/" + this._decideJsonFilename(json);
+
+        if (fs.existsSync(path+".json")) {
+            console.log("Possible name collision at "+path);
+            path += Date.now();
+        }
         
-        return process.env.FOLDER_NAME_JSON + subDir + "/" + name + '.json';
+        return path + '.json';
     }
     
-    _decideJsonSaveLocation(ItemType) {
-        switch (ItemType) {
+    _decideJsonSaveLocation(json) {
+        switch (json.ItemType) {
             case 1:   return "/Component";
             case 2:   return "/Device";
             case 3:   return "/Weapon";
@@ -47,7 +50,25 @@ export default class FileJson extends File {
             case 27:  return "/Ammunition/Bullets";
             case 100: return "/Settings";
             case 101: return "/Settings";
+            case 102: return "/Settings";
+            case 103: return "/Settings";
             default:  return "/_unclassified";
         }
     }
+
+    _decideJsonFilename(json) {
+        switch (json.ItemType) {
+            case 100:   return "Ships";
+            case 101:   return "Galaxy";
+            case 102:   return "Database";
+            case 103:   return "Exploration";
+            default:
+                let name = '';
+                if (typeof(json.Name)!=='undefined') name += json.Name.replace("$","");
+                if (typeof(json.Id)!=='undefined') name += "_"+json.Id;
+                if (name==='') name = Date.now();
+                return name;
+        }
+    }
+
 }

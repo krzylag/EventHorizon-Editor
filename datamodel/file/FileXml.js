@@ -13,7 +13,7 @@ export default class FileXml extends File {
     }
 
     getSavePath() {
-        return process.env.FOLDER_NAME_IMAGES + "/" + this.name;
+        return process.env.FOLDER_NAME_XML + "/" + this.name;
     }
 
 }

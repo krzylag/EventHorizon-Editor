@@ -14,7 +14,7 @@ export default class File {
             this.data = createUint8Array(this.startFrom, data);
             this.stopAt = this.startFrom+4+this.data.length-1;
 
-        } else if (type===TYPE.IMAGE || type===TYPE.XML || type===TYPE.WAV) {
+        } else if (type===TYPE.IMAGE || type===TYPE.XML || type===TYPE.SOUND) {
 
             this.startFrom = startFrom;
             let pointer = startFrom;
