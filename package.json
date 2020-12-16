@@ -1,18 +1,17 @@
 {
-  "name": "eh_decompler",
-  "version": "1.0.0",
+  "name": "eh_decompiler",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node --experimental-modules ./index.js"
+    "start": "node --experimental-modules --experimental-json-modules ./index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^8.2.0",
-    "text-encoding": "^0.7.0",
     "uint32": "^0.2.1",
-    "xml2json": "^0.12.0"
+    "xml2js": "^0.4.23"
   }
 }

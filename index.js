@@ -1,37 +1,29 @@
-import dotenv from 'dotenv';
 import fs from 'fs';
-import Packager from './packager/Packager.js';
-import DataModel from './datamodel/DataModel.js';
+import Packager from './app/packager/Packager.js'
+import DataModel from './app/datamodel/DataModel.js'
 
-dotenv.config();
+export const FOLDER_INPUT = './INPUT'
+export const FOLDER_OUTPUT = './OUTPUT'
+export const ENCODING = 'utf-8'
 
-if (fs.existsSync(process.env.FOLDER_OUTPUT)) {
-    fs.rmdirSync(process.env.FOLDER_OUTPUT, { recursive: true });
+if (!fs.existsSync(FOLDER_INPUT)) {
+    fs.mkdirSync(FOLDER_INPUT);
 }
-if (!fs.existsSync(process.env.FOLDER_OUTPUT)) {
-    fs.mkdirSync(process.env.FOLDER_OUTPUT);
+if (fs.existsSync(FOLDER_OUTPUT)) {
+    fs.rmdirSync(FOLDER_OUTPUT, { recursive: true });
 }
-
-for (let fname of fs.readdirSync(process.env.FOLDER_INPUT)) {
-    if (fname !== '.gitkeep') {
-
-        let unpacked = Packager.unpack(fs.readFileSync("./"+process.env.FOLDER_INPUT+"/"+fname));
-
-        //fs.writeFileSync("./"+process.env.FOLDER_OUTPUT+"/"+fname+".dec", unpacked);
-
-        let model = new DataModel(unpacked);
+fs.mkdirSync(FOLDER_OUTPUT);
 
 
-        model.save("./"+process.env.FOLDER_OUTPUT+"/"+model.mod_name);
+for (let fname of fs.readdirSync(FOLDER_INPUT)) {
 
-        fs.writeFileSync("./"+process.env.FOLDER_OUTPUT+"/"+model.mod_name+"/id", model.mod_name+"\n"+model.mod_guid)
+    if (fname === '.gitkeep') continue
 
-        console.log({
-            name: model.mod_name,
-            guid: model.mod_guid,
-            files: model.files.length
-        });
-        fs.writeFileSync("./"+process.env.FOLDER_OUTPUT+"/dict", JSON.stringify(model.namesDictionary));
-        // console.log(model.englishTranslation);
-    }
+    const unpacked = Packager.unpack(
+        fs.readFileSync("./"+FOLDER_INPUT+"/"+fname)
+    )
+    let model = new DataModel(unpacked)
+
+    model.save(FOLDER_OUTPUT)
+
 }
