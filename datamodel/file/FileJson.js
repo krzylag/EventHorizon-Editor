@@ -13,9 +13,9 @@ export default class FileJson extends File {
         return new TextDecoder(process.env.ENCODING).decode(this.data)
     }
 
-    getSavePath() {
+    getSavePath(namesDictionary) {
         let json = JSON.parse(this.getFileContents());
-        let path = process.env.FOLDER_NAME_JSON + this._decideJsonSaveLocation(json) + "/" + this._decideJsonFilename(json);
+        let path = process.env.FOLDER_NAME_JSON + this._decideJsonSaveLocation(json) + "/" + this._decideJsonFilename(json, namesDictionary);
 
         if (fs.existsSync(path+".json")) {
             console.log("Possible name collision at "+path);
@@ -56,19 +56,32 @@ export default class FileJson extends File {
         }
     }
 
-    _decideJsonFilename(json) {
+    _decideJsonFilename(json, namesDictionary) {
         switch (json.ItemType) {
+            case 8:     return this._getNameFromDictionary({ ItemType: 6, Id: json.ShipId }, json.Id, json.Id, namesDictionary);
+            case 10:    return this._getNameFromDictionary({ ItemType: 1, Id: json.ItemId }, json.Faction, json.Id, namesDictionary);
             case 100:   return "Ships";
             case 101:   return "Galaxy";
             case 102:   return "Database";
             case 103:   return "Exploration";
-            default:
-                let name = '';
-                if (typeof(json.Name)!=='undefined') name += json.Name.replace("$","");
-                if (typeof(json.Id)!=='undefined') name += "_"+json.Id;
-                if (name==='') name = Date.now();
-                return name;
+            default:    return this._getNameFromDictionary({ ItemType: json.ItemType, Id: json.Id }, json.Name, json.Id, namesDictionary);
         }
+    }
+
+    _getNameFromDictionary(jsonLookup, defaultName, id, namesDictionary) {
+        let buildName = '';
+        if (typeof jsonLookup.ItemType!=='undefined' 
+                && typeof jsonLookup.Id!=='undefined' 
+                && typeof namesDictionary["t"+jsonLookup.ItemType]!=='undefined'
+                && typeof namesDictionary["t"+jsonLookup.ItemType]["i"+jsonLookup.Id]!=='undefined'
+        ) {
+            buildName = namesDictionary["t"+jsonLookup.ItemType]["i"+jsonLookup.Id];
+        } else if (typeof(defaultName)!=='undefined' && defaultName!==null) {
+            buildName = defaultName.toString().replace("$","");
+        }
+        if (typeof(id)!=='undefined' && id!==null) buildName += " id_"+id;
+        if (buildName==='') buildName = Date.now();
+        return buildName.replace(/[^\d]/g,'');
     }
 
 }

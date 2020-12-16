@@ -18,6 +18,6 @@ export default class FileSound extends File {
     }
 
     getSavePath() {
-        return process.env.FOLDER_NAME_SOUND + "/" + this.name;
+        return process.env.FOLDER_NAME_SOUND + "/" + this.name + ".wav";
     }
 }

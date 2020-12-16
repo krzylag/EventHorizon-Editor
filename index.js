@@ -17,20 +17,21 @@ for (let fname of fs.readdirSync(process.env.FOLDER_INPUT)) {
 
         let unpacked = Packager.unpack(fs.readFileSync("./"+process.env.FOLDER_INPUT+"/"+fname));
 
-        fs.writeFileSync("./"+process.env.FOLDER_OUTPUT+"/"+fname+".dec", unpacked);
+        //fs.writeFileSync("./"+process.env.FOLDER_OUTPUT+"/"+fname+".dec", unpacked);
 
         let model = new DataModel(unpacked);
 
-        for (let idx in model.files) {
-            model.files[idx].save("./"+process.env.FOLDER_OUTPUT+"/"+model.mod_name);
-        }
 
-        // fs.writeFileSync("./"+process.env.FOLDER_OUTPUT+"/"+model.mod_name+"/id", model.mod_name+"\n"+model.mod_guid)
+        model.save("./"+process.env.FOLDER_OUTPUT+"/"+model.mod_name);
+
+        fs.writeFileSync("./"+process.env.FOLDER_OUTPUT+"/"+model.mod_name+"/id", model.mod_name+"\n"+model.mod_guid)
 
         console.log({
             name: model.mod_name,
             guid: model.mod_guid,
             files: model.files.length
-        })
+        });
+        fs.writeFileSync("./"+process.env.FOLDER_OUTPUT+"/dict", JSON.stringify(model.namesDictionary));
+        // console.log(model.englishTranslation);
     }
 }

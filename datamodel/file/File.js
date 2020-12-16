@@ -32,8 +32,12 @@ export default class File {
         return this.stopAt;
     }
 
-    save(modPath) {
-        let savePath = modPath+"/"+this.getSavePath();
+    getName() {
+        return this.name;
+    }
+
+    save(modPath, namesDictionary) {
+        let savePath = modPath+"/"+this.getSavePath(namesDictionary);
         let parent = savePath.split("/").filter((v,i,a)=>(i<a.length-1)).join("/");
 
         if (fs.existsSync(savePath)) {
