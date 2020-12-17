@@ -1,3 +1,4 @@
+import fs from 'fs'
 import deserialize from './deserialize.js'
 import { TYPE } from './File.js'
 import Translator, { TRANSLATION_FILENAME } from './Translator.js'
@@ -27,5 +28,7 @@ export default class DataModel {
         this.files.forEach(item => {
             item.save(path)
         })
+
+        fs.writeFileSync(`${path}/id`, this.name+"\n"+this.guid)
     }
 }
